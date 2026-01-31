@@ -100,12 +100,11 @@ function displayProducts(products) {
             </td>
             <td class="product-name">
                 ${product.title}
-                <span class="info-icon" title="Hover để xem mô tả">ℹ️</span>
+                <span class="info-icon" title="Hover để xem mô tả">ℹ️
+                    <div class="product-description-tooltip">${product.description || 'Không có mô tả'}</div>
+                </span>
             </td>
             <td class="product-price">$${product.price}</td>
-            <td class="product-description-cell">
-                <div class="product-description-tooltip">${product.description || 'Không có mô tả'}</div>
-            </td>
             <td><span class="product-category">${product.category?.name || 'N/A'}</span></td>
         `;
         
