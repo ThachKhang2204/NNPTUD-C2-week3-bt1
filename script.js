@@ -21,6 +21,7 @@ async function getAll() {
         
         // Lưu dữ liệu
         allProducts = products;
+        filteredProducts = [...products];
         
         // Hiển thị trang đầu tiên
         goToPage(1);
@@ -36,9 +37,40 @@ async function getAll() {
 
 // Biến lưu trữ dữ liệu và phân trang
 let allProducts = [];
+let filteredProducts = [];
 let currentPage = 1;
 let itemsPerPage = 10;
 let currentSort = { field: null, order: 'asc' };
+let searchTerm = '';
+
+// Hàm tìm kiếm sản phẩm theo title
+function searchProducts(term) {
+    searchTerm = term.toLowerCase().trim();
+    
+    if (searchTerm === '') {
+        filteredProducts = [...allProducts];
+    } else {
+        filteredProducts = allProducts.filter(product => 
+            product.title.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    // Cập nhật thông tin kết quả tìm kiếm
+    const searchResult = document.getElementById('searchResult');
+    if (searchTerm && filteredProducts.length > 0) {
+        searchResult.textContent = `Tìm thấy ${filteredProducts.length} sản phẩm`;
+        searchResult.style.display = 'inline';
+    } else if (searchTerm && filteredProducts.length === 0) {
+        searchResult.textContent = 'Không tìm thấy sản phẩm nào';
+        searchResult.style.display = 'inline';
+    } else {
+        searchResult.style.display = 'none';
+    }
+    
+    // Quay về trang 1 và hiển thị kết quả
+    currentPage = 1;
+    goToPage(1);
+}
 
 // Hàm hiển thị sản phẩm lên bảng
 function displayProducts(products) {
@@ -83,7 +115,7 @@ function displayProducts(products) {
 
 // Hàm sắp xếp sản phẩm
 function sortProducts(field, order) {
-    allProducts.sort((a, b) => {
+    filteredProducts.sort((a, b) => {
         let valueA, valueB;
         
         if (field === 'price') {
@@ -127,13 +159,13 @@ function paginate(products, page, perPage) {
 
 // Hàm cập nhật thông tin trang
 function updatePageInfo() {
-    const totalPages = Math.ceil(allProducts.length / itemsPerPage);
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
     document.getElementById('pageInfo').textContent = `Trang ${currentPage} / ${totalPages}`;
 }
 
 // Hàm tạo nút phân trang
 function createPagination() {
-    const totalPages = Math.ceil(allProducts.length / itemsPerPage);
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
     const pageNumbersDiv = document.getElementById('pageNumbers');
     pageNumbersDiv.innerHTML = '';
     
@@ -158,7 +190,7 @@ function createPagination() {
 
 // Hàm chuyển trang
 function goToPage(page) {
-    const totalPages = Math.ceil(allProducts.length / itemsPerPage);
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
     if (page < 1 || page > totalPages) return;
     
     currentPage = page;
@@ -168,7 +200,7 @@ function goToPage(page) {
         sortProducts(currentSort.field, currentSort.order);
     }
     
-    const paginatedProducts = paginate(allProducts, currentPage, itemsPerPage);
+    const paginatedProducts = paginate(filteredProducts, currentPage, itemsPerPage);
     displayProducts(paginatedProducts);
     updatePageInfo();
     createPagination();
@@ -182,6 +214,11 @@ function goToPage(page) {
 document.addEventListener('DOMContentLoaded', () => {
     getAll();
     
+    // Xử lý tìm kiếm
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        searchProducts(e.target.value);
+    });
+    
     // Xử lý thay đổi số sản phẩm mỗi trang
     document.getElementById('itemsPerPage').addEventListener('change', (e) => {
         itemsPerPage = parseInt(e.target.value);
@@ -194,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('prevPage').addEventListener('click', () => goToPage(currentPage - 1));
     document.getElementById('nextPage').addEventListener('click', () => goToPage(currentPage + 1));
     document.getElementById('lastPage').addEventListener('click', () => {
-        const totalPages = Math.ceil(allProducts.length / itemsPerPage);
+        const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
         goToPage(totalPages);
     });
     
